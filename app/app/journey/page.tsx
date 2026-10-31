@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
+import {appendEvent,EVENT_KEY} from '../../lib/profile-evidence.mjs';
 
 type Entry={done:boolean;rating:'liked'|'neutral'|'disliked'|null;note:string};
 const KEY='carli-taste-journey-v1';
@@ -24,13 +25,18 @@ export default function Journey(){
  const [loaded,setLoaded]=useState(false);
  useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const parsed:unknown=JSON.parse(raw);if(valid(parsed))setEntries(parsed.map(e=>({...e,note:e.note.slice(0,300)})));}}catch{}setLoaded(true)},[]);
  useEffect(()=>{if(loaded){try{localStorage.setItem(KEY,JSON.stringify(entries))}catch{}}},[entries,loaded]);
- const update=(patch:Partial<Entry>)=>setEntries(prev=>prev.map((e,i)=>i===day?{...e,...patch}:e));
+ const update=(patch:Partial<Entry>)=>{
+  if(patch.done===true&&!entries[day].done){
+   try{const raw=JSON.parse(localStorage.getItem(EVENT_KEY)||'[]');localStorage.setItem(EVENT_KEY,JSON.stringify(appendEvent(raw,'journey_completed')))}catch{}
+  }
+  setEntries(prev=>prev.map((e,i)=>i===day?{...e,...patch}:e));
+ };
  const completed=entries.filter(e=>e.done).length;
  const entry=entries[day];
  const reset=()=>{if(!window.confirm('Delete all seven days of local journey notes and progress?'))return;setEntries(empty());setDay(0);try{localStorage.removeItem(KEY)}catch{}};
  const styles={maxWidth:780,margin:'0 auto',padding:'24px 18px 72px',fontFamily:'system-ui, sans-serif',color:'#173e36',lineHeight:1.55} as const;
  return <main style={styles}>
-  <Link href="/" style={{color:'#286e55'}}>← Back to cultural discovery</Link>
+  <Link href="/profile" style={{marginRight:16}}>My Taste Profile</Link><Link href="/" style={{color:'#286e55'}}>← Back to cultural discovery</Link>
   <p style={{marginTop:28,letterSpacing:2,fontSize:12,color:'#477260'}}>CARLi TASTE / OPTIONAL JOURNEY</p>
   <h1 style={{fontSize:'clamp(28px,5vw,42px)',lineHeight:1.13,margin:'10px 0'}}>Seven days of better discovery</h1>
   <p>Explore your cultural interests with one small, self-chosen activity a day. This is a personal reflection tool, not medical advice or proof of improved health.</p>
