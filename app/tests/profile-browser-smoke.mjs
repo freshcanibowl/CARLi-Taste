@@ -1,0 +1,33 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({headless:true});
+try{
+ const page=await browser.newPage({viewport:{width:390,height:844},acceptDownloads:true});
+ const base=process.env.SMOKE_BASE_URL||'http://127.0.0.1:3127';
+ const candidate={id:'demo1',name:'Jazz Hall',category:'urn:entity',petPolicy:'UNVERIFIED',actionable:false};
+ await page.route('**/api/recommend',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'CULTURAL_CANDIDATES_UNVERIFIED',candidates:[candidate]})}));
+ await page.goto(base+'/',{waitUntil:'networkidle'});
+ await page.getByRole('button',{name:'Explore cultural matches'}).click();
+ await page.getByRole('button',{name:'View candidate evidence'}).click();
+ await page.goto(base+'/profile',{waitUntil:'networkidle'});
+ await page.getByText('1',{exact:true}).first().waitFor();
+ const metrics=await page.locator('dl').innerText();
+ assert.match(metrics,/Completed discovery searches\s+1/);
+ assert.match(metrics,/Candidate detail actions\s+1/);
+ assert.match(metrics,/Seven-day user retention\s+Not measured/);
+ const dl=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Download my Taste Profile'}).click();
+ const download=await dl;
+ assert.equal(download.suggestedFilename(),'carli-taste-profile.json');
+ const exported=JSON.parse(await (await import('node:fs/promises')).readFile(await download.path(),'utf8'));
+ assert.equal(exported.schema,'carli-taste-portable-profile-v1');
+ assert.equal('events' in exported,false);
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('input[type=file]').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))});
+ await page.getByText('Profile imported locally.',{exact:false}).waitFor();
+ page.once('dialog',dialog=>dialog.accept());
+ await page.getByRole('button',{name:'Delete local interaction evidence'}).click();
+ const cleared=await page.locator('dl').innerText();
+ assert.match(cleared,/Completed discovery searches\s+0/);
+ console.log('PROFILE_BROWSER_SMOKE_PASS');
+}finally{await browser.close()}
