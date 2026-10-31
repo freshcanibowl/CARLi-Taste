@@ -27,6 +27,8 @@ try{
  await page.getByText('Profile imported locally.',{exact:false}).waitFor();
  page.once('dialog',dialog=>dialog.accept());
  await page.getByRole('button',{name:'Delete local interaction evidence'}).click();
+ await page.getByText('Local interaction evidence cleared.').waitFor();
+ await page.waitForFunction(()=>{const label=Array.from(document.querySelectorAll('dt')).find(e=>e.textContent?.trim()==='Completed discovery searches');return label?.nextElementSibling?.textContent?.trim()==='0'});
  const cleared=await page.locator('dl').innerText();
  assert.match(cleared,/Completed discovery searches\s+0/);
  console.log('PROFILE_BROWSER_SMOKE_PASS');
