@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import {MEMORY_KEY,JOURNEY_KEY,rankLocal,safeFeedback} from '../lib/taste-memory.mjs';
+import {appendEvent,EVENT_KEY} from '../lib/profile-evidence.mjs';
 type Candidate={id:string;name:string;category:string;petPolicy:string;actionable:boolean;localScore?:number;localReasons?:string[];originalQlooPosition?:number};
 type Feedback=Record<string,'liked'|'disliked'>;
 function categoryLabel(category:string){
@@ -18,6 +19,12 @@ export default function Home(){
  const [feedback,setFeedback]=useState<Feedback>({});
  const [journey,setJourney]=useState<unknown[]>([]);
  const [loaded,setLoaded]=useState(false);
+ const [expanded,setExpanded]=useState<Record<string,boolean>>({});
+ const record=(type:string,id?:string)=>{
+  try{const raw=JSON.parse(localStorage.getItem(EVENT_KEY)||'[]');localStorage.setItem(EVENT_KEY,JSON.stringify(appendEvent(raw,type,Date.now(),id)))}catch{}
+ };
+ const detail=(id:string)=>{setExpanded(prev=>({...prev,[id]:!prev[id]}));if(!expanded[id])record('candidate_opened',id)};
+
  useEffect(()=>{
   try{
    setAdaptive(localStorage.getItem('carli-taste-adaptive-opt-in')==='true');
@@ -27,7 +34,7 @@ export default function Home(){
  },[]);
  useEffect(()=>{if(loaded)try{localStorage.setItem(MEMORY_KEY,JSON.stringify(feedback));localStorage.setItem('carli-taste-adaptive-opt-in',String(adaptive));}catch{}},[feedback,adaptive,loaded]);
  const localCandidates=result?.candidates?adaptive?rankLocal(result.candidates,{feedback,journey}):result.candidates:[];
- const rate=(id:string,value:'liked'|'disliked')=>setFeedback(prev=>({...prev,[id]:prev[id]===value?undefined:value} as Feedback));
+ const rate=(id:string,value:'liked'|'disliked')=>{setFeedback(prev=>({...prev,[id]:prev[id]===value?undefined:value} as Feedback));record('candidate_feedback',id)};
  const erase=()=>{if(!window.confirm('Delete stored CARLi Taste likes/dislikes and turn off adaptive ranking? Journey activity notes are managed separately on the Journey page.'))return;setFeedback({});setAdaptive(false);try{localStorage.removeItem(MEMORY_KEY);localStorage.removeItem('carli-taste-adaptive-opt-in')}catch{}};
 
  async function run(){
@@ -36,7 +43,7 @@ export default function Home(){
 
    try{
      const response=await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taste,constraints}),cache:'no-store'});
-     const data:Result=await response.json();setResult(data);
+     const data:Result=await response.json();setResult(data);if(response.ok&&Array.isArray(data.candidates))record('discovery_completed');
    }catch{setResult({status:'NETWORK_ERROR',message:'Could not contact the application server.'})}
    finally{setBusy(false)}
  }
@@ -44,7 +51,7 @@ export default function Home(){
   <p style={{letterSpacing:2,color:'#437d65'}}>CARLi × QLOO</p>
   <h1>Cultural Discovery for People &amp; Pets</h1>
   <p>Discover places matching your cultural interests. Qloo is used for cultural discovery, not pet-entry approval.</p>
-  <p><a href="/journey" style={{display:'inline-block',padding:'10px 15px',background:'#e1f3e6',color:'#21513f',borderRadius:10,fontWeight:600}}>Start the 7-Day Lifestyle Journey →</a></p>
+  <p><a href="/profile" style={{marginRight:14}}>My Taste Profile &amp; Evidence</a><a href="/journey" style={{display:'inline-block',padding:'10px 15px',background:'#e1f3e6',color:'#21513f',borderRadius:10,fontWeight:600}}>Start the 7-Day Lifestyle Journey →</a></p>
   <p style={{background:'#eef5ef',padding:'10px 14px',borderRadius:9,color:'#285b45'}}>How it works: enter an interest, explore Qloo cultural matches, then independently verify each venue's pet policy before planning a visit.</p>
   <label>What do you enjoy?<textarea value={taste} onChange={e=>setTaste(e.target.value)} style={{display:'block',width:'100%',minHeight:70,marginBottom:16}}/></label>
   <label>Pet and outing constraints<textarea value={constraints} onChange={e=>setConstraints(e.target.value)} style={{display:'block',width:'100%',minHeight:70,marginBottom:16}}/></label>
@@ -60,6 +67,8 @@ export default function Home(){
    {localCandidates.map(item=><article key={item.id} style={{border:'1px solid #ccd5d0',padding:16,marginBottom:12,borderRadius:10}}>
      <strong>{item.name}</strong><p>Category: {categoryLabel(item.category)} · Cultural source: Qloo</p>
      <p>Pet policy: <strong>{item.petPolicy}</strong> · No pet-entry approval has been verified</p>
+     <button type="button" onClick={()=>detail(item.id)} aria-expanded={!!expanded[item.id]}>{expanded[item.id]?'Hide evidence details':'View candidate evidence'}</button>
+     {expanded[item.id]&&<p style={{background:'#f0f5f1',padding:10,borderRadius:8,fontSize:13}}>Source: Qloo cultural discovery. Candidate ID: {item.id}. The listed category is not proof of a venue's pet policy, operating hours, accessibility or availability. This action is recorded only in this browser.</p>}
      {adaptive&&<div><small>Qloo source position: {item.originalQlooPosition} · Local adjustment: {item.localScore||0}</small>
       <p style={{fontSize:13}}>{item.localReasons?.length?item.localReasons.join('; '):'No local adjustment; original Qloo order retained for ties.'}</p>
       <button type="button" aria-label={`Like ${item.name}`} onClick={()=>rate(item.id,'liked')} aria-pressed={feedback[item.id]==='liked'} style={{marginRight:9}}>♡ Like</button>
