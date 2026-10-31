@@ -24,6 +24,7 @@ export default function Home(){
   <p style={{letterSpacing:2,color:'#437d65'}}>CARLi × QLOO</p>
   <h1>Cultural Discovery for People &amp; Pets</h1>
   <p>Discover places matching your cultural interests. Qloo is used for cultural discovery, not pet-entry approval.</p>
+  <p><a href="/journey" style={{display:'inline-block',padding:'10px 15px',background:'#e1f3e6',color:'#21513f',borderRadius:10,fontWeight:600}}>Start the 7-Day Lifestyle Journey →</a></p>
   <p style={{background:'#eef5ef',padding:'10px 14px',borderRadius:9,color:'#285b45'}}>How it works: enter an interest, explore Qloo cultural matches, then independently verify each venue's pet policy before planning a visit.</p>
   <label>What do you enjoy?<textarea value={taste} onChange={e=>setTaste(e.target.value)} style={{display:'block',width:'100%',minHeight:70,marginBottom:16}}/></label>
   <label>Pet and outing constraints<textarea value={constraints} onChange={e=>setConstraints(e.target.value)} style={{display:'block',width:'100%',minHeight:70,marginBottom:16}}/></label>
