@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateRequest,normalizeEvidence,rankWithEvidence} from '../lib/contract.mjs';
+test('validates normal input',()=>assert.equal(validateRequest({taste:'Jazz',constraints:'small dog'}).ok,true));
+test('rejects missing taste',()=>assert.equal(validateRequest({taste:' ',constraints:''}).ok,false));
+test('rejects oversized input',()=>assert.equal(validateRequest({taste:'a'.repeat(501),constraints:''}).ok,false));
+test('rejects non-object body',()=>assert.equal(validateRequest(null).ok,false));
+test('rejects non-string constraints',()=>assert.equal(validateRequest({taste:'Jazz',constraints:1}).ok,false));
+test('normalizes evidence without fabricating attributes',()=>assert.deepEqual(normalizeEvidence([{id:'1',name:'A'}]),[{id:'1',name:'A',source:'qloo',category:'unknown'}]));
+test('rejects malformed evidence',()=>assert.throws(()=>normalizeEvidence([{id:'1'}])));
+test('fails closed without independent pet-friendly verification',()=>assert.equal(rankWithEvidence([{id:'1'}],[{id:'1'}],[]).length,0));
+test('requires matching Qloo evidence',()=>assert.equal(rankWithEvidence([{id:'1'}],[],['1']).length,0));
+test('allows independently verified evidence-backed item',()=>assert.equal(rankWithEvidence([{id:'1'}],[{id:'1'}],['1']).length,1));

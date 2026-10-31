@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {planCandidates,compareAblation} from '../lib/planner.mjs';
+const candidates=[{id:'a',name:'A',tags:['quiet']},{id:'b',name:'B',tags:['crowded']}];
+const evidence=[{id:'a',name:'A',source:'qloo'},{id:'b',name:'B',source:'qloo'}];
+const petFriendlyProofs=[{candidateId:'a',verified:true,sourceUrl:'https://example.org/a'},{candidateId:'b',verified:true,sourceUrl:'https://example.org/b'}];
+const args={candidates,evidence,petFriendlyProofs};
+test('only jointly evidenced recommendations pass',()=>{assert.equal(planCandidates(args).accepted.length,2)});
+test('no Qloo evidence rejects',()=>{assert.equal(planCandidates({...args,evidence:[]}).accepted.length,0)});
+test('no independent policy rejects',()=>{assert.equal(planCandidates({...args,petFriendlyProofs:[]}).accepted.length,0)});
+test('unsafe proof URL rejected',()=>{assert.equal(planCandidates({...args,petFriendlyProofs:[{candidateId:'a',verified:true,sourceUrl:'http://example.org'}]}).accepted.length,0)});
+test('constraint tag blocks venue',()=>{const p=planCandidates({...args,blockedTags:['crowded']});assert.deepEqual(p.accepted.map(x=>x.id),['a'])});
+test('approval never implicit',()=>{assert.ok(planCandidates(args).accepted.every(x=>x.requiresOwnerApproval))});
+test('ablation is labelled as fixture',()=>{const p=compareAblation(args);assert.equal(p.deltaVerifiedRecommendations,2);assert.match(p.disclaimer,/Offline fixture/) });
+test('malformed candidates fail closed',()=>{assert.equal(planCandidates({...args,candidates:[{}]}).accepted.length,0)});
