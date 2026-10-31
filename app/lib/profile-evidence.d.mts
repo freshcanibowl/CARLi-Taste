@@ -1,0 +1,12 @@
+export const EVENT_KEY:string;
+export const PROFILE_SCHEMA:string;
+export const EVENT_TYPES:readonly string[];
+export type EvidenceEvent={type:string;at:number;candidateId?:string};
+export type JourneyEntry={done:boolean;rating:'liked'|'neutral'|'disliked'|null;note:string};
+export type PortableProfile={schema:string;exportedAt:string;adaptive:boolean;feedback:Record<string,'liked'|'disliked'>;journey:JourneyEntry[]};
+export function validateEvents(raw:unknown):EvidenceEvent[];
+export function appendEvent(raw:unknown,type:string,at?:number,candidateId?:string):EvidenceEvent[];
+export function localMetrics(raw:unknown):{searches:number;opened:number;feedbackActions:number;journeyCompletions:number;openPerSearch:number|null;retention7Day:null;scope:string};
+export function portableProfile(feedback:unknown,journey:unknown,adaptive:unknown):PortableProfile;
+export function parsePortableProfile(raw:string):PortableProfile;
+export function browserKeys():{feedback:string;journey:string;optin:string;events:string};
