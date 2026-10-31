@@ -47,3 +47,4 @@ jobs:
           done
           curl --fail http://127.0.0.1:3127/journey > /dev/null
           node tests/journey-browser-smoke.mjs
+          node tests/adaptive-browser-smoke.mjs
