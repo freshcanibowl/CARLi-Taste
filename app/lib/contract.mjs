@@ -1,7 +1,7 @@
 export const MAX_INPUT = 500;
 export function validateRequest(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {ok:false,error:'Body must be an object'};
-  const {taste,constraints} = value;
+  const {taste,constraints=''} = value;
   if(typeof taste!=='string'||!taste.trim()||taste.length>MAX_INPUT) return {ok:false,error:'taste must be 1–500 characters'};
   if(typeof constraints!=='string'||constraints.length>MAX_INPUT) return {ok:false,error:'constraints must be 0–500 characters'};
   return {ok:true,value:{taste:taste.trim(),constraints:constraints.trim()}};

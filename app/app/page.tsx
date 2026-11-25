@@ -42,7 +42,7 @@ export default function Home(){
    try{const j=localStorage.getItem(JOURNEY_KEY);if(j){const parsed:unknown=JSON.parse(j);if(Array.isArray(parsed))setJourney(parsed);}}catch{}
 
    try{
-     const response=await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taste,constraints}),cache:'no-store'});
+     const response=await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taste}),cache:'no-store'});
      const data:Result=await response.json();setResult(data);if(response.ok&&Array.isArray(data.candidates))record('discovery_completed');
    }catch{setResult({status:'NETWORK_ERROR',message:'Could not contact the application server.'})}
    finally{setBusy(false)}
@@ -55,7 +55,7 @@ export default function Home(){
   <p style={{background:'#eef5ef',padding:'10px 14px',borderRadius:9,color:'#285b45'}}>How it works: enter an interest, explore Qloo cultural matches, then independently verify each venue's pet policy before planning a visit.</p>
   <label>What do you enjoy?<textarea value={taste} onChange={e=>setTaste(e.target.value)} style={{display:'block',width:'100%',minHeight:70,marginBottom:16}}/></label>
   <label>Pet and outing notes (for your own planning; not used to filter results)<textarea maxLength={500} value={constraints} onChange={e=>setConstraints(e.target.value)} style={{display:'block',width:'100%',minHeight:70,marginBottom:8}}/></label>
-  <p role="note" style={{fontSize:13,color:'#5c4730',background:'#fff5e8',border:'1px solid #ead7b2',padding:'10px 12px',borderRadius:8,marginTop:0}}>Important: these notes do not affect Qloo search or verify accessibility, crowd levels, animal entry, or safety. The search request sends both your interest and these notes to the CARLi application server, which uses only your interest for Qloo discovery. Do not enter private or sensitive information.</p>
+  <p role="note" style={{fontSize:13,color:'#5c4730',background:'#fff5e8',border:'1px solid #ead7b2',padding:'10px 12px',borderRadius:8,marginTop:0}}>Important: these notes do not affect Qloo search or verify accessibility, crowd levels, animal entry, or safety. Only your cultural interest is sent to the CARLi application server on search. These optional outing notes stay in this browser's current page memory, are not saved, and are never sent to Qloo or the CARLi server. Do not enter private or sensitive information.</p>
   <section aria-label="Adaptive taste settings" style={{border:'1px solid #c8d9ce',padding:14,borderRadius:12,marginBottom:18}}>
    <label style={{display:'block',fontWeight:600}}><input type="checkbox" checked={adaptive} onChange={e=>setAdaptive(e.target.checked)}/> Use my local Journey ratings and venue feedback to reorder results</label>
    <p style={{fontSize:13,margin:'8px 0'}}>Optional and off by default. Qloo still returns the original cultural candidates. Only this browser reorders them using simple keyword matching and your explicit ratings. Personal notes and feedback are never sent to Qloo or the server. This is not an AI recommendation quality claim.</p>
