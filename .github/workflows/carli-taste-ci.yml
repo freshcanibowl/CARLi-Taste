@@ -49,3 +49,4 @@ jobs:
           node tests/journey-browser-smoke.mjs
           node tests/adaptive-browser-smoke.mjs
           node tests/profile-browser-smoke.mjs
+          npm run verify:live -- --base http://127.0.0.1:3127
