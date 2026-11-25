@@ -28,7 +28,7 @@ For live discovery, configure `QLOO_API_KEY` in server-side environment variable
 
 1. Takes an interest, queries Qloo Search for interest seeds and Qloo Insights for cultural entities.
 2. Displays cultural matches with pet policies **UNVERIFIED** and no pet-entry approval.
-3. Accepts optional outing notes; these are transmitted to the CARLi app server, but **are not currently used to filter/rank Qloo results**, nor are they submitted to Qloo as search constraints.
+3. Accepts optional outing notes for current-page planning; these **are not transmitted to the CARLi app server or Qloo, are not saved, and are not used to filter/rank results**. Only the interest goes to the application server on search. Older API clients may still submit constraints, but the server no longer echoes those notes in responses.
 4. Offers a seven-day voluntary reflection tool and local feedback. Journey notes and likes/dislikes are stored in **this browser's localStorage**; no account or cross-device synchronization is implemented.
 5. Offers opt-in **client-side** ranking and manual export/import of a portable local profile. This is a heuristic reordering, not a validated AI relevance or wellbeing outcome.
 6. Records limited local interaction events for a **single browser**. These are not population analytics, independently validated visits, bookings, retention, or revenue.
