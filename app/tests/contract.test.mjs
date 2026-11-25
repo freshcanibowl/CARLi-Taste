@@ -11,3 +11,4 @@ test('rejects malformed evidence',()=>assert.throws(()=>normalizeEvidence([{id:'
 test('fails closed without independent pet-friendly verification',()=>assert.equal(rankWithEvidence([{id:'1'}],[{id:'1'}],[]).length,0));
 test('requires matching Qloo evidence',()=>assert.equal(rankWithEvidence([{id:'1'}],[],['1']).length,0));
 test('allows independently verified evidence-backed item',()=>assert.equal(rankWithEvidence([{id:'1'}],[{id:'1'}],['1']).length,1));
+test('allows interest-only discovery without personal outing notes',()=>assert.deepEqual(validateRequest({taste:'Jazz'}),{ok:true,value:{taste:'Jazz',constraints:''}}));
