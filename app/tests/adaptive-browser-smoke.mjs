@@ -18,6 +18,9 @@ try{
  await cards.first().waitFor();
  assert.match(await cards.first().innerText(),/Generic Hall/);
  assert.ok(!JSON.stringify(bodySent).includes('journey'));
+ assert.deepEqual(Object.keys(bodySent),['taste']);
+ assert.ok(!JSON.stringify(bodySent).includes('small dog'));
+
  assert.equal(await page.getByText('Category: Cultural place').count(),3);
  await page.getByLabel('Use my local Journey ratings and venue feedback to reorder results').check();
  await page.getByRole('button',{name:'Like Community Garden'}).click();
