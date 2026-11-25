@@ -7,3 +7,5 @@ test('recommend API uses real discoverCulture adapter',()=>assert.match(route,/a
 test('recommend API fails closed without Qloo key',()=>assert.match(route,/QLOO_KEY_MISSING/));
 test('recommend API never approves pet venues',()=>assert.match(route,/buildDiscoveryView/));
 test('status distinguishes configured key from live verification',()=>{assert.match(status,/qlooConfigured/);assert.match(status,/liveQlooVerified:false/)});
+test('status exposes non-secret release revision and remains clear on lack of Qloo verification',()=>{assert.match(status,/VERCEL_GIT_COMMIT_SHA/);assert.match(status,/revisionVerified/);assert.match(status,/liveQlooVerified:false/)});
+test('live probe is read-only and checks all three pages plus status',()=>{const probe=readFileSync(new URL('../scripts/verify-live.mjs',import.meta.url),'utf8');assert.match(probe,/\/journey/);assert.match(probe,/\/profile/);assert.match(probe,/\/api\/status/);assert.match(probe,/REVISION_MISMATCH/);assert.doesNotMatch(probe,/method:\s*'POST'/)});
