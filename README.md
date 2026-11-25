@@ -1,15 +1,51 @@
 # CARLi Taste × Qloo
 
-Qloo-powered cultural discovery with transparent venue-policy boundaries.
+Cultural-interest discovery prototype for people and pet guardians. Qloo supplies cultural candidate signals; **CARLi Taste does not establish whether venues permit pets**.
 
-## Run
+## Public demo
 
-The Next.js application lives in `app/`. After downloading the source release, run `npm install`, `npm test`, and `npm run dev` from `app/`. Configure `QLOO_API_KEY` server-side only; never publish your real key.
+- Discovery: https://carli-taste-qloo.vercel.app/
+- Optional seven-day journey: https://carli-taste-qloo.vercel.app/journey
+- Local taste profile and usage evidence: https://carli-taste-qloo.vercel.app/profile
+- Devpost submission: https://devpost.com/software/carli-taste-qloo-cultural-discovery
 
-## Status
+The above are the configured public URLs, not a claim of independently verified current uptime. Production deployment has previously been reported READY; live monitoring is not configured.
 
-Hackathon prototype. Live API verification and public demo deployment remain pending. Cultural affinity is **not** proof that a venue permits pets. Pet policies remain unverified until independently confirmed.
+## Run locally
 
-## Source upload
+```bash
+cd app
+npm install
+npm test
+npm run typecheck
+npm run build
+npm run dev
+```
 
-This repository is being populated from the Build 15 sanitized source package; this README alone is not the complete application.
+For live discovery, configure `QLOO_API_KEY` in server-side environment variables only. Never commit API keys or expose them with a `NEXT_PUBLIC_` prefix. The API routes require a valid Qloo key for a live response; the app does not synthesize pet-friendly venues if Qloo fails.
+
+## What the demo actually does
+
+1. Takes an interest, queries Qloo Search for interest seeds and Qloo Insights for cultural entities.
+2. Displays cultural matches with pet policies **UNVERIFIED** and no pet-entry approval.
+3. Accepts optional outing notes; these are transmitted to the CARLi app server, but **are not currently used to filter/rank Qloo results**, nor are they submitted to Qloo as search constraints.
+4. Offers a seven-day voluntary reflection tool and local feedback. Journey notes and likes/dislikes are stored in **this browser's localStorage**; no account or cross-device synchronization is implemented.
+5. Offers opt-in **client-side** ranking and manual export/import of a portable local profile. This is a heuristic reordering, not a validated AI relevance or wellbeing outcome.
+6. Records limited local interaction events for a **single browser**. These are not population analytics, independently validated visits, bookings, retention, or revenue.
+
+## Safety and privacy boundaries
+
+- Always verify pet-entry policy, accessibility, hours, and other venue requirements independently.
+- Do not enter health records, identifying details, or other sensitive information in the discovery form or personal notes.
+- Other users of the same browser may see the locally stored profile. Exported JSON contains optional reflections; store it carefully.
+- Use the Journey page to delete notes and the Discovery page to clear feedback. Profile page supports clearing local interaction evidence.
+- This is **not** a clinical tool, veterinary advice, or evidence of improved health.
+
+## Pilot acceptance gates
+
+- **Technical GO:** repeatable `npm test`, TypeScript check, production build, browser smoke tests of Discovery/Journey/Profile; publicly accessible routes verified externally.
+- **Data/safety GO:** Qloo is a real source, upstream failures fail closed, pet policies always remain explicitly unverified without independent evidence, user data controls work.
+- **Commercial GO:** documented consent for pilot participants, real independent user sessions, feedback and value hypothesis, and an observable paid-use signal. No pilot, conversion, retention, or revenue claims before actual evidence.
+- **STOP:** misleading pet-friendly claims; loss or leakage of private user notes; exposed secret; unexpectedly high upstream API spend; inability to reproduce critical tests.
+
+Status: **deployed hackathon prototype, not a validated commercial product**. Public landing-page functionality alone does not establish pilot adoption or production readiness.
