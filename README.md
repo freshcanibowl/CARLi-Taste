@@ -49,3 +49,20 @@ For live discovery, configure `QLOO_API_KEY` in server-side environment variable
 - **STOP:** misleading pet-friendly claims; loss or leakage of private user notes; exposed secret; unexpectedly high upstream API spend; inability to reproduce critical tests.
 
 Status: **deployed hackathon prototype, not a validated commercial product**. Public landing-page functionality alone does not establish pilot adoption or production readiness.
+
+## Build 38 — strict external release verification
+
+The `/api/status` endpoint provides the deployment revision, environment name and whether a Qloo key is configured. This is metadata, **not** proof of actual Qloo connectivity or pet approval.
+
+From a machine with real access to the public domain, use the **exact 40-character SHA deployed by Vercel**:
+
+```bash
+cd app
+npm run verify:live -- --production --base https://carli-taste-qloo.vercel.app --sha YOUR_FULL_40_CHARACTER_COMMIT_SHA
+```
+
+This read-only check verifies four HTTP routes, a full matching revision, HTTPS, Vercel's `production` environment and that a Qloo key is configured. It fails closed on an unreachable URL, a mismatch, preview deployment, missing key or unexpected redirects. It **does not** call the metered Qloo API, prove end-to-end Qloo results, audit data retention, or prove real user adoption. Treat `PRODUCTION_HTTP_AND_RELEASE_PASS` as a limited deployment gate only.
+
+For local development use `npm run verify:live -- --base http://127.0.0.1:3127`. A local `HTTP_ROUTES_PASS` without a full SHA explicitly has `releaseVerified:false`.
+
+**Current connection blocker (25 Nov 2026):** both linked Vercel accounts returned zero CARLi Taste projects and the previously configured public domain could not be reached from the assistant's runtime. This may reflect project ownership, authorization, removal, DNS or egress restrictions; the evidence cannot distinguish them. No current production release or real Qloo call has been independently verified. Before inviting participants, identify the actual Vercel project owner/domain, restore read permission, check the live deployment SHA, run this command externally and perform a consented, non-sensitive real-interest Qloo test.

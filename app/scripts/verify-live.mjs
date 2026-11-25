@@ -5,6 +5,12 @@ const value=(key)=>{const i=argv.indexOf(key);return i<0?null:argv[i+1]||null;};
 const base=(value('--base')||process.env.CARLI_BASE_URL||'http://127.0.0.1:3127').replace(/\/+$/,'');
 const expected=(value('--sha')||process.env.CARLI_EXPECTED_SHA||'').trim();
 const timeout=Number(value('--timeout-ms')||'8000');
+const production=argv.includes('--production');
+const strictSha=/^[0-9a-f]{40}$/i.test(expected);
+if(production&&(!base.startsWith('https://')||!strictSha)){
+ console.error('PRODUCTION_GATE_INVALID_ARGS: production verification requires HTTPS --base and full 40-character --sha');
+ process.exit(2);
+}
 if(!/^https?:\/\//.test(base)||!Number.isInteger(timeout)||timeout<1000||timeout>30000){console.error('Invalid base URL or timeout');process.exit(2)}
 const checks=[
  {path:'/',marker:'Cultural Discovery for People'},
@@ -32,6 +38,8 @@ for(const check of checks){
    entry.petPoliciesVerified=obj.petPoliciesVerified===true;
    if(obj.app!=='CARLi Taste'||obj.service!=='ok')entry.reason='STATUS_SCHEMA_MISMATCH';
    else if(expected&&obj.revision!==expected)entry.reason='REVISION_MISMATCH';
+   else if(production&&obj.environment!=='production')entry.reason='NOT_PRODUCTION_ENVIRONMENT';
+   else if(production&&obj.qlooConfigured!==true)entry.reason='QLOO_NOT_CONFIGURED';
    else entry.outcome='PASS';
   }else{
    const body=await response.text();
@@ -44,5 +52,6 @@ for(const check of checks){
 }
 const passed=results.every(x=>x.outcome==='PASS');
 const status=results.find(x=>x.path==='/api/status');
-console.log(JSON.stringify({gate:passed?'HTTP_ROUTES_PASS':'NO_GO',releaseVerified:passed&&!!expected,expectedRevision:expected||null,actualRevision:status?.revision||null,qlooLiveVerified:false,petPolicyApproved:false}));
+const releaseVerified=passed&&strictSha&&status?.revision===expected;
+console.log(JSON.stringify({gate:!passed?'NO_GO':production?'PRODUCTION_HTTP_AND_RELEASE_PASS':'HTTP_ROUTES_PASS',productionGate:production,releaseVerified,expectedRevision:expected||null,actualRevision:status?.revision||null,qlooConfigured:status?.qlooConfigured===true,qlooLiveVerified:false,petPolicyApproved:false}));
 if(!passed)process.exitCode=1;
