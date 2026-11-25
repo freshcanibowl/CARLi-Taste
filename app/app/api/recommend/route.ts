@@ -12,7 +12,7 @@ export async function POST(req:Request){
   if(!process.env.QLOO_API_KEY)return NextResponse.json({status:'QLOO_KEY_MISSING',message:'Configure server-only QLOO_API_KEY.',recommendations:[]},{status:503,headers:{'Cache-Control':'no-store'}});
   try{
     const result=await discoverCulture({interest:validated.value.taste,location:'Kuala Lumpur'});
-    return NextResponse.json({...buildDiscoveryView(result),seeds:result.seeds||[],petConstraints:validated.value.constraints,liveSource:'qloo-api'},{headers:{'Cache-Control':'no-store'}});
+    return NextResponse.json({...buildDiscoveryView(result),seeds:result.seeds||[],liveSource:'qloo-api'},{headers:{'Cache-Control':'no-store'}});
   }catch(e){
     const code=e instanceof Error?e.message:'UNKNOWN';
     return NextResponse.json({status:'QLOO_UNAVAILABLE',error:code,recommendations:[]},{status:502,headers:{'Cache-Control':'no-store'}});
